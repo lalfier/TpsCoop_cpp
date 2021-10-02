@@ -28,12 +28,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
+	bool wasCrouchKeyPressed;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	// Called on input event
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+	void BeginCrouch();
+	void EndCrouch();
+	void BeginJump();
 
 public:	
 	// Called every frame
