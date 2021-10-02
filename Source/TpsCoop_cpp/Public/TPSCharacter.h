@@ -6,6 +6,11 @@
 #include "GameFramework/Character.h"
 #include "TPSCharacter.generated.h"
 
+// Forward declaration
+class UCameraComponent;
+class USpringArmComponent;
+
+
 UCLASS()
 class TPSCOOP_CPP_API ATPSCharacter : public ACharacter
 {
@@ -16,8 +21,19 @@ public:
 	ATPSCharacter();
 
 protected:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UCameraComponent* CameraComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USpringArmComponent* SpringArmComp;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	// Called on input event
+	void MoveForward(float Value);
+	void MoveRight(float Value);
 
 public:	
 	// Called every frame
