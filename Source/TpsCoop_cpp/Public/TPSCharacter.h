@@ -10,6 +10,7 @@
 class UCameraComponent;
 class USpringArmComponent;
 class ATPSWeapon;
+class UTPSHealthComponent;
 
 
 UCLASS()
@@ -29,24 +30,31 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PlayerHealth")
+	UTPSHealthComponent* HealthComp;
+
+	// Pawn died previously
+	UPROPERTY(BlueprintReadOnly, Category = "Player")
+	bool bDied;
+
 	bool bWasCrouchKeyPressed;
 
 	ATPSWeapon* CurrentWeapon;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly, Category = "PlayerWeapon")
 	TSubclassOf<ATPSWeapon> StarterWeaponClass;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
+	UPROPERTY(VisibleDefaultsOnly, Category = "PlayerWeapon")
 	FName WeaponAttachSocketName;
 
 	bool bWantsToZoom;
 	
 	float DeafultFOV;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly, Category = "PlayerWeapon")
 	float ZoomedFOV;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (ClampMin = 0.1, ClampMax = 100.0))
+	UPROPERTY(EditDefaultsOnly, Category = "PlayerWeapon", meta = (ClampMin = 0.1, ClampMax = 100.0))
 	float ZoomInterpSpeed;
 
 	// Called when the game starts or when spawned
@@ -62,6 +70,10 @@ protected:
 	void EndFire();
 	void BeginZoom();
 	void EndZoom();
+
+	// Event called
+	UFUNCTION()
+	void OnHealthChanged(UTPSHealthComponent* InHealthComp, float CurrentHealth, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
 public:	
 	// Called every frame
