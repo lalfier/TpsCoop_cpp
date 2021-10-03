@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "TPSWeapon.h"
 
 
 // Sets default values
@@ -23,7 +24,12 @@ ATPSCharacter::ATPSCharacter()
 	// Enable crouch (UE4 function)
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
-	wasCrouchKeyPressed = false;
+	bWasCrouchKeyPressed = false;
+
+	// Setup weapon/zoom
+	WeaponAttachSocketName = "WeaponSocket";
+	ZoomedFOV = 65.0f;
+	ZoomInterpSpeed = 20.0f;
 }
 
 // Called when the game starts or when spawned
@@ -31,6 +37,18 @@ void ATPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Save starting camera FOV
+	DeafultFOV = CameraComp->FieldOfView;
+
+	// Spawn a default weapon
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	CurrentWeapon = GetWorld()->SpawnActor<ATPSWeapon>(StarterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+	if(CurrentWeapon)
+	{
+		CurrentWeapon->SetOwner(this);
+		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+	}
 }
 
 // Called on input event
@@ -47,7 +65,7 @@ void ATPSCharacter::MoveRight(float Value)
 
 void ATPSCharacter::BeginCrouch()
 {
-	wasCrouchKeyPressed = true;
+	bWasCrouchKeyPressed = true;
 	if(GetMovementComponent()->IsMovingOnGround())
 	{
 		Crouch();
@@ -56,7 +74,7 @@ void ATPSCharacter::BeginCrouch()
 
 void ATPSCharacter::EndCrouch()
 {
-	wasCrouchKeyPressed = false;
+	bWasCrouchKeyPressed = false;
 	UnCrouch();
 }
 
@@ -66,6 +84,34 @@ void ATPSCharacter::BeginJump()
 }
 #pragma endregion MOVEMENT
 
+#pragma region WEAPON
+void ATPSCharacter::BeginFire()
+{
+	if(CurrentWeapon)
+	{
+		CurrentWeapon->StartFire();
+	}
+}
+
+void ATPSCharacter::EndFire()
+{
+	if(CurrentWeapon)
+	{
+		CurrentWeapon->StopFire();
+	}
+}
+
+void ATPSCharacter::BeginZoom()
+{
+	bWantsToZoom = true;
+}
+
+void ATPSCharacter::EndZoom()
+{
+	bWantsToZoom = false;
+}
+#pragma endregion WEAPON
+
 // Called every frame
 void ATPSCharacter::Tick(float DeltaTime)
 {
@@ -74,11 +120,17 @@ void ATPSCharacter::Tick(float DeltaTime)
 	// Got to crouch while landing if key was pressed in air
 	if(!GetCharacterMovement()->IsCrouching())
 	{
-		if(wasCrouchKeyPressed)
+		if(bWasCrouchKeyPressed)
 		{
 			BeginCrouch();
 		}
 	}
+
+	// Check if player ADS
+	float TargetFOV = bWantsToZoom ? ZoomedFOV : DeafultFOV;
+	// Smooth transition with interpolation
+	float NewFOV = FMath::FInterpTo(CameraComp->FieldOfView, TargetFOV, DeltaTime, ZoomInterpSpeed);
+	CameraComp->SetFieldOfView(NewFOV);
 }
 
 // Called to bind functionality to input
@@ -98,6 +150,10 @@ void ATPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ATPSCharacter::BeginCrouch);
 	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ATPSCharacter::EndCrouch);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATPSCharacter::BeginJump);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ATPSCharacter::BeginFire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ATPSCharacter::EndFire);
+	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &ATPSCharacter::BeginZoom);
+	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &ATPSCharacter::EndZoom);
 }
 
 // Override so we can use it on third person character

@@ -9,6 +9,7 @@
 // Forward declaration
 class UCameraComponent;
 class USpringArmComponent;
+class ATPSWeapon;
 
 
 UCLASS()
@@ -28,7 +29,25 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
-	bool wasCrouchKeyPressed;
+	bool bWasCrouchKeyPressed;
+
+	ATPSWeapon* CurrentWeapon;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<ATPSWeapon> StarterWeaponClass;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
+	FName WeaponAttachSocketName;
+
+	bool bWantsToZoom;
+	
+	float DeafultFOV;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	float ZoomedFOV;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (ClampMin = 0.1, ClampMax = 100.0))
+	float ZoomInterpSpeed;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -39,6 +58,10 @@ protected:
 	void BeginCrouch();
 	void EndCrouch();
 	void BeginJump();
+	void BeginFire();
+	void EndFire();
+	void BeginZoom();
+	void EndZoom();
 
 public:	
 	// Called every frame

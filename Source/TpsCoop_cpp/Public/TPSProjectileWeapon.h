@@ -21,4 +21,5 @@ protected:
 
 	// Override base weapon fire function
 	virtual void Fire() override;
+
 };

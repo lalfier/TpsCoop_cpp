@@ -20,5 +20,9 @@ void ATPSProjectileWeapon::Fire()
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 		GetWorld()->SpawnActor<AActor>(ProjectileClass, MuzzleLocation, EyeRotation, SpawnParams);
+
+		PlayFireEffects(MuzzleLocation);
+
+		LastFireTime = GetWorld()->TimeSeconds;
 	}
 }
