@@ -99,3 +99,14 @@ void ATPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ATPSCharacter::EndCrouch);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATPSCharacter::BeginJump);
 }
+
+// Override so we can use it on third person character
+FVector ATPSCharacter::GetPawnViewLocation() const
+{
+	if(CameraComp)
+	{
+		return CameraComp->GetComponentLocation();
+	}
+
+	return Super::GetPawnViewLocation();
+}

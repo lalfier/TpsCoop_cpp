@@ -47,4 +47,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// Override so we can use it on third person character
+	virtual FVector GetPawnViewLocation() const override;
+
 };
