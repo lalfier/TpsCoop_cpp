@@ -55,7 +55,7 @@ void ATPSCharacter::BeginPlay()
 
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		// Spawn a default weapon
+		// Spawn a default weapon as server
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		CurrentWeapon = GetWorld()->SpawnActor<ATPSWeapon>(StarterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
@@ -201,6 +201,7 @@ void ATPSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	// This macro is default: replicate CurrentWeapon variable to all clients connected.
+	// This macro is default: replicate CurrentWeapon, bDied variable to all clients connected.
 	DOREPLIFETIME(ATPSCharacter, CurrentWeapon);
+	DOREPLIFETIME(ATPSCharacter, bDied);
 }
