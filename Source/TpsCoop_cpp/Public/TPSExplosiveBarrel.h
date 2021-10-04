@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "TPSExplosiveBarrel.generated.h"
 
-
+// Forward declaration
 class UTPSHealthComponent;
 class UStaticMeshComponent;
 class URadialForceComponent;
@@ -32,6 +32,14 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	URadialForceComponent* RadialForceComp;
+
+	// Damage to other actors on explosion
+	UPROPERTY(EditDefaultsOnly, Category = "BarrelDamage")
+	float ExplosionDamage;
+
+	// Radius of damage explosion
+	UPROPERTY(EditDefaultsOnly, Category = "BarrelDamage")
+	float ExplosionRadius;
 
 	// Impulse applied to the barrel mesh when it explodes to boost it up a little
 	UPROPERTY(EditDefaultsOnly, Category = "FX")

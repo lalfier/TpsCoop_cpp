@@ -36,7 +36,12 @@ void UTPSHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage
 	// Update health clamped
 	CurrentHealth = FMath::Clamp((CurrentHealth - Damage), 0.0f, MaxHealth);
 
-	UE_LOG(LogTemp, Log, TEXT("Health Changed: %s"), *FString::SanitizeFloat(CurrentHealth));
+	UE_LOG(LogTemp, Log, TEXT("%s Health Changed: %s"), *DamagedActor->GetName(), *FString::SanitizeFloat(CurrentHealth));
 
 	OnHealthChanged.Broadcast(this, CurrentHealth, Damage, DamageType, InstigatedBy, DamageCauser);
+}
+
+void UTPSHealthComponent::ResetCurrentHeath()
+{
+	CurrentHealth = MaxHealth;
 }

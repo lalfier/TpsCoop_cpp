@@ -5,6 +5,7 @@
 #include "Components/TPSHealthComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PhysicsEngine/RadialForceComponent.h"
+#include "DrawDebugHelpers.h"
 
 
 // Sets default values
@@ -27,6 +28,8 @@ ATPSExplosiveBarrel::ATPSExplosiveBarrel()
 	RadialForceComp->bIgnoreOwningActor = true;	// Ignore self
 
 	ExplosionImpulse = 400;
+	ExplosionDamage = 100;
+	ExplosionRadius = 300;
 }
 
 void ATPSExplosiveBarrel::OnHealthChanged(UTPSHealthComponent* InHealthComp, float CurrentHealth, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
@@ -53,7 +56,9 @@ void ATPSExplosiveBarrel::OnHealthChanged(UTPSHealthComponent* InHealthComp, flo
 		// Blast away nearby physics actors
 		RadialForceComp->FireImpulse();
 
-		// TODO: Apply radial damage
-
+		// Apply radial damage to nearby actors
+		TArray<AActor*> IgnoredActors;
+		UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadius, UDamageType::StaticClass(), IgnoredActors, this, nullptr, false, ECC_Visibility);
+		DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Yellow, false, 1.0f, 0, 2.0f);
 	}
 }
