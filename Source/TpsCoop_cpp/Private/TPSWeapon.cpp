@@ -13,8 +13,8 @@
 
 
 // Console variable
-static int32 DebugWeaponDrawing = 0;
-FAutoConsoleVariableRef CVARDebugWeaponDrawing(TEXT("COOP.DebugWeapons"), DebugWeaponDrawing, TEXT("Draw Debug Lines for Weapons"), ECVF_Cheat);
+int32 ATPSWeapon::DrawWeaponDebugLinesValue = 0;
+FAutoConsoleVariableRef ATPSWeapon::DrawWeaponDebugLines(TEXT("COOP.DebugWeapons"), DrawWeaponDebugLinesValue, TEXT("Draw Debug Lines for Weapons"), ECVF_Cheat);
 
 
 // Sets default values
@@ -99,7 +99,7 @@ void ATPSWeapon::Fire()
 			TracerEndPoint = Hit.ImpactPoint;
 		}
 
-		if(DebugWeaponDrawing > 0)
+		if(ATPSWeapon::DrawWeaponDebugLinesValue > 0)
 		{
 			DrawDebugLine(GetWorld(), EyeLocation, TraceEnd, FColor::White, false, 1.0f, 0, 1.0f);
 		}

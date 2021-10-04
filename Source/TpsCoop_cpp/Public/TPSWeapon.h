@@ -81,4 +81,10 @@ public:
 
 	void StopFire();
 
+public:
+	static FAutoConsoleVariableRef DrawWeaponDebugLines;
+
+protected:
+	static int32 DrawWeaponDebugLinesValue;
+
 };

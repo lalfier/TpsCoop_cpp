@@ -2,6 +2,8 @@
 
 
 #include "TPSProjectileWeapon.h"
+#include "DrawDebugHelpers.h"
+#include "../TpsCoop_cpp.h"
 
 
 void ATPSProjectileWeapon::Fire()
@@ -13,13 +15,33 @@ void ATPSProjectileWeapon::Fire()
 		FVector EyeLocation;
 		FRotator EyeRotation;
 		WeaponOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
+		FVector ShotDirection = EyeRotation.Vector();
+		FVector TraceEnd = EyeLocation + (ShotDirection * 10000);
 
-		FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(WeaponOwner);
+		QueryParams.AddIgnoredActor(this);
+
+		// Target location with hit-scan
+		FVector TracerEndPoint = TraceEnd;
+		FHitResult Hit;
+		if(GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd, COLLISION_WEAPON, QueryParams))
+		{
+			TracerEndPoint = Hit.ImpactPoint;
+		}
+
+		if(ATPSWeapon::DrawWeaponDebugLinesValue > 0)
+		{
+			DrawDebugLine(GetWorld(), EyeLocation, TraceEnd, FColor::White, false, 1.0f, 0, 1.0f);
+		}
 
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-		GetWorld()->SpawnActor<AActor>(ProjectileClass, MuzzleLocation, EyeRotation, SpawnParams);
+		FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
+		TracerEndPoint -= MuzzleLocation;
+		TracerEndPoint.Normalize();
+		GetWorld()->SpawnActor<AActor>(ProjectileClass, MuzzleLocation, TracerEndPoint.Rotation(), SpawnParams);
 
 		PlayFireEffects(MuzzleLocation);
 
