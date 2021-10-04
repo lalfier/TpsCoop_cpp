@@ -41,10 +41,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "BarrelDamage")
 	float ExplosionRadius;
 
-	// Impulse applied to the barrel mesh when it explodes to boost it up a little
-	UPROPERTY(EditDefaultsOnly, Category = "FX")
-	float ExplosionImpulse;
-
 	// Particle to play when health reached zero
 	UPROPERTY(EditDefaultsOnly, Category = "FX")
 	UParticleSystem* ExplosionEffect;
@@ -53,7 +49,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "FX")
 	UMaterialInterface* ExplodedMaterial;
 
+	UPROPERTY(ReplicatedUsing=OnRep_Exploded)
 	bool bExploded;
+
+	UFUNCTION()
+	void OnRep_Exploded();
 
 	UFUNCTION()
 	void OnHealthChanged(UTPSHealthComponent* InHealthComp, float CurrentHealth, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);

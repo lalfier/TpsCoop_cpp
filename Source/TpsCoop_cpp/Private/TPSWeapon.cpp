@@ -50,7 +50,7 @@ void ATPSWeapon::BeginPlay()
 #pragma region FIRE
 void ATPSWeapon::Fire()
 {	
-	if(GetLocalRole() < ROLE_Authority)
+	if(!HasAuthority())
 	{
 		// If client calls this, push request to server
 		ServerFire();
@@ -90,7 +90,10 @@ void ATPSWeapon::Fire()
 			{
 				ActualDamage *= DamageMultiplier;
 			}
-			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, WeaponOwner->GetInstigatorController(), this, DamageType);
+			if(HasAuthority())
+			{
+				UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, WeaponOwner->GetInstigatorController(), this, DamageType);
+			}			
 
 			PlayImapctEffects(SurfaceType, Hit.ImpactPoint);
 
@@ -104,7 +107,7 @@ void ATPSWeapon::Fire()
 
 		PlayFireEffects(TracerEndPoint);
 
-		if(GetLocalRole() == ROLE_Authority)
+		if(HasAuthority())
 		{
 			// As server save end point and surface type for other clients
 			HitScanTrace.TraceTo = TracerEndPoint;

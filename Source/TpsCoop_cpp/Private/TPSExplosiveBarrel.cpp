@@ -2,6 +2,7 @@
 
 
 #include "TPSExplosiveBarrel.h"
+#include "Net/UnrealNetwork.h"
 #include "Components/TPSHealthComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PhysicsEngine/RadialForceComponent.h"
@@ -22,14 +23,17 @@ ATPSExplosiveBarrel::ATPSExplosiveBarrel()
 
 	RadialForceComp = CreateDefaultSubobject<URadialForceComponent>(TEXT("RadialForceComp"));
 	RadialForceComp->SetupAttachment(MeshComp);
-	RadialForceComp->Radius = 250.0f;
+	RadialForceComp->Radius = 400.0f;
+	RadialForceComp->ImpulseStrength = 600.0f;
 	RadialForceComp->bImpulseVelChange = true;
 	RadialForceComp->bAutoActivate = false;	// Prevent component from ticking, and only use FireImpulse() instead
 	RadialForceComp->bIgnoreOwningActor = true;	// Ignore self
 
-	ExplosionImpulse = 400;
-	ExplosionDamage = 100;
-	ExplosionRadius = 300;
+	ExplosionDamage = 100.0f;
+	ExplosionRadius = 400.0f;
+
+	SetReplicates(true);
+	SetReplicateMovement(true);
 }
 
 void ATPSExplosiveBarrel::OnHealthChanged(UTPSHealthComponent* InHealthComp, float CurrentHealth, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
@@ -44,14 +48,14 @@ void ATPSExplosiveBarrel::OnHealthChanged(UTPSHealthComponent* InHealthComp, flo
 		// Explode!
 		bExploded = true;
 
-		// Boost the barrel upwards
-		FVector BoostIntensity = FVector::UpVector * ExplosionImpulse;
-		MeshComp->AddImpulse(BoostIntensity, NAME_None, true);
-
 		// Play FX and change self material
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
 		// Override material on mesh with blackened version
 		MeshComp->SetMaterial(0, ExplodedMaterial);
+
+		// Boost the barrel upwards
+		FVector BoostIntensity = FVector::UpVector * RadialForceComp->ImpulseStrength;
+		MeshComp->AddImpulse(BoostIntensity, NAME_None, true);
 
 		// Blast away nearby physics actors
 		RadialForceComp->FireImpulse();
@@ -61,4 +65,21 @@ void ATPSExplosiveBarrel::OnHealthChanged(UTPSHealthComponent* InHealthComp, flo
 		UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadius, UDamageType::StaticClass(), IgnoredActors, this, nullptr, false, ECC_Visibility);
 		DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Yellow, false, 1.0f, 0, 2.0f);
 	}
+}
+
+void ATPSExplosiveBarrel::OnRep_Exploded()
+{
+	// Play FX and change self material
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
+	// Override material on mesh with blackened version
+	MeshComp->SetMaterial(0, ExplodedMaterial);
+}
+
+// Apply rules for variable replications.
+void ATPSExplosiveBarrel::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// This macro is default: replicate bExploded variable to all clients connected.
+	DOREPLIFETIME(ATPSExplosiveBarrel, bExploded);
 }

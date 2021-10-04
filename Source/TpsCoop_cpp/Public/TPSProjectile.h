@@ -9,6 +9,7 @@
 // Forward declaration
 class UStaticMeshComponent;
 class UProjectileMovementComponent;
+class URadialForceComponent;
 class UParticleSystem;
 
 
@@ -31,6 +32,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UProjectileMovementComponent* ProjectileMoveComp;
 
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	URadialForceComponent* RadialForceComp;
+
 	// Particle to play when exploded
 	UPROPERTY(EditDefaultsOnly, Category = "FX")
 	UParticleSystem* ExplosionEffect;
@@ -47,7 +51,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectileDamage")
 	float ExplosionDelay;
 
-	void Explode();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastExplode();
 
 	// Function that is called when the projectile hits something.
 	UFUNCTION()

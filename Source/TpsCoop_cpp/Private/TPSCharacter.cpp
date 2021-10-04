@@ -53,7 +53,7 @@ void ATPSCharacter::BeginPlay()
 	// Subscribe to an event
 	HealthComp->OnHealthChanged.AddDynamic(this, &ATPSCharacter::OnHealthChanged);
 
-	if(GetLocalRole() == ROLE_Authority)
+	if(HasAuthority())
 	{
 		// Spawn a default weapon as server
 		FActorSpawnParameters SpawnParams;
