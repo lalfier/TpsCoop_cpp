@@ -2,6 +2,7 @@
 
 
 #include "TPSWeapon.h"
+#include "Net/UnrealNetwork.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet//GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
@@ -32,6 +33,11 @@ ATPSWeapon::ATPSWeapon()
 	// Setup weapon effects
 	MuzzleSocketName = "MuzzleSocket";
 	TracerTargetName = "BeamEnd";
+
+	// When server spawns weapon, than spawn it on clients also
+	SetReplicates(true);
+	NetUpdateFrequency = 66.0f;
+	MinNetUpdateFrequency = 33.0f;
 }
 
 void ATPSWeapon::BeginPlay()
@@ -41,8 +47,15 @@ void ATPSWeapon::BeginPlay()
 	TimeBetweenShots = 60 / RateOfFire;
 }
 
+#pragma region FIRE
 void ATPSWeapon::Fire()
-{
+{	
+	if(GetLocalRole() < ROLE_Authority)
+	{
+		// If client calls this, push request to server
+		ServerFire();
+	}
+
 	// Trace the world, from pawn eyes to cross-hair location
 	AActor* WeaponOwner = GetOwner();
 	if(WeaponOwner)
@@ -62,6 +75,7 @@ void ATPSWeapon::Fire()
 
 		// Target location for Particle system
 		FVector TracerEndPoint = TraceEnd;
+		EPhysicalSurface SurfaceType = SurfaceType_Default;
 
 		FHitResult Hit;
 		if(GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd, COLLISION_WEAPON, QueryParams))
@@ -70,7 +84,7 @@ void ATPSWeapon::Fire()
 			AActor* HitActor = Hit.GetActor();
 
 			// Select damage depending on hit surface type
-			EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
+			SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
 			float ActualDamage = BaseDamage;
 			if(SurfaceType == SURFACE_FLESHVULNERABLE)
 			{
@@ -78,23 +92,7 @@ void ATPSWeapon::Fire()
 			}
 			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, WeaponOwner->GetInstigatorController(), this, DamageType);
 
-			// Select effect depending on hit surface type
-			UParticleSystem* SelectedEffect = nullptr;
-			switch (SurfaceType)
-			{
-			case SURFACE_FLESHDEFAULT:
-			case SURFACE_FLESHVULNERABLE:
-				SelectedEffect = FleshImpactEffect;
-				break;
-			default:
-				SelectedEffect = DefaultImpactEffect;
-				break;
-			}
-			// Play selected effect
-			if(SelectedEffect)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SelectedEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
-			}
+			PlayImapctEffects(SurfaceType, Hit.ImpactPoint);
 
 			TracerEndPoint = Hit.ImpactPoint;
 		}
@@ -106,8 +104,33 @@ void ATPSWeapon::Fire()
 
 		PlayFireEffects(TracerEndPoint);
 
+		if(GetLocalRole() == ROLE_Authority)
+		{
+			// As server save end point and surface type for other clients
+			HitScanTrace.TraceTo = TracerEndPoint;
+			HitScanTrace.HitSurfaceType = SurfaceType;
+			HitScanTrace.bForceReplication = !HitScanTrace.bForceReplication;	// Force replication
+		}
+
 		LastFireTime = GetWorld()->TimeSeconds;
 	}
+}
+
+void ATPSWeapon::ServerFire_Implementation()
+{
+	Fire();
+}
+
+bool ATPSWeapon::ServerFire_Validate()
+{
+	return true;
+}
+
+void ATPSWeapon::OnRep_HitScanTrace()
+{
+	// Play cosmetic FX on other clients
+	PlayFireEffects(HitScanTrace.TraceTo);
+	PlayImapctEffects(HitScanTrace.HitSurfaceType, HitScanTrace.TraceTo);
 }
 
 void ATPSWeapon::StartFire()
@@ -151,4 +174,39 @@ void ATPSWeapon::PlayFireEffects(FVector TraceEnd)
 			PC->ClientStartCameraShake(FireCamShake);
 		}
 	}
+}
+
+void ATPSWeapon::PlayImapctEffects(EPhysicalSurface HitSurfaceType, FVector ImpactPoint)
+{
+	// Select effect depending on hit surface type
+	UParticleSystem* SelectedEffect = nullptr;
+	switch(HitSurfaceType)
+	{
+	case SURFACE_FLESHDEFAULT:
+	case SURFACE_FLESHVULNERABLE:
+		SelectedEffect = FleshImpactEffect;
+		break;
+	default:
+		SelectedEffect = DefaultImpactEffect;
+		break;
+	}
+	// Play selected effect
+	if(SelectedEffect)
+	{
+		FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
+		FVector ShotDirection = ImpactPoint - MuzzleLocation;
+		ShotDirection.Normalize();
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SelectedEffect, ImpactPoint, ShotDirection.Rotation());
+	}
+}
+
+#pragma endregion FIRE
+
+// Apply rules for variable replications.
+void ATPSWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// This macro is with condition: replicate HitScanTrace struct to all but not to client owning this weapon
+	DOREPLIFETIME_CONDITION(ATPSWeapon, HitScanTrace, COND_SkipOwner);
 }

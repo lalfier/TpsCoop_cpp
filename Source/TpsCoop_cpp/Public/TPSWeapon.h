@@ -12,6 +12,26 @@ class UDamageType;
 class UParticleSystem;
 
 
+// Contains information of a single hit-scan weapon line-trace
+USTRUCT()
+struct FHitScanTrace
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY()
+	TEnumAsByte<EPhysicalSurface> HitSurfaceType;
+
+	UPROPERTY()
+	FVector_NetQuantize TraceTo;
+
+	// Helper bool to force replication even when the player shoots at the same spot.
+	UPROPERTY()
+	bool bForceReplication = false;
+};
+
+
 UCLASS()
 class TPSCOOP_CPP_API ATPSWeapon : public AActor
 {
@@ -71,9 +91,22 @@ protected:
 
 	// Weapon FX
 	void PlayFireEffects(FVector TraceEnd);
+	void PlayImapctEffects(EPhysicalSurface HitSurfaceType, FVector ImpactPoint);
 
 	// Virtual so other weapons can override this
 	virtual void Fire();
+
+	// Does not run on client but push request to the server
+	// Will get to the server
+	// Validation for cheating
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerFire();
+
+	UPROPERTY(ReplicatedUsing=OnRep_HitScanTrace)
+	FHitScanTrace HitScanTrace;
+
+	UFUNCTION()
+	void OnRep_HitScanTrace();
 
 public:
 

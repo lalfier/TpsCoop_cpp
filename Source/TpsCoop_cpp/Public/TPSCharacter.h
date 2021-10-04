@@ -39,6 +39,8 @@ protected:
 
 	bool bWasCrouchKeyPressed;
 
+	// Replicate for clients
+	UPROPERTY(Replicated)
 	ATPSWeapon* CurrentWeapon;
 
 	UPROPERTY(EditDefaultsOnly, Category = "PlayerWeapon")
