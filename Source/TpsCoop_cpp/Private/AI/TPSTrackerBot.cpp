@@ -268,6 +268,8 @@ void ATPSTrackerBot::Tick(float DeltaTime)
 
 void ATPSTrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
 {
+	Super::NotifyActorBeginOverlap(OtherActor);
+
 	if(!bStartedSelfDestruction && !bExploded)
 	{
 		ATPSCharacter* PlayerPawn = Cast<ATPSCharacter>(OtherActor);
