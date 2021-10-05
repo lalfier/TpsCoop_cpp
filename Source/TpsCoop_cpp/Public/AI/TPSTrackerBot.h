@@ -65,6 +65,7 @@ protected:
 	// Dynamic material to pulse on damage
 	UMaterialInstanceDynamic* MatInst;
 
+	UPROPERTY(ReplicatedUsing = OnRep_Exploded)
 	bool bExploded;
 
 	bool bStartedSelfDestruction;
@@ -83,7 +84,7 @@ protected:
 	int32 MaxPowerLevel;
 
 	// The power boost of the bot, affects damaged caused to enemies and color of the bot
-	UPROPERTY(ReplicatedUsing=OnRep_PowerLevel, EditDefaultsOnly, Category = "TrackerBot")
+	UPROPERTY(ReplicatedUsing=OnRep_PowerLevel)
 	int32 PowerLevel;
 
 	UFUNCTION()
@@ -91,10 +92,12 @@ protected:
 
 	FVector GetNextPathPoint();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastSelfDestruct();
+	void SelfDestruct();
 
 	void DamageSelf();
+
+	UFUNCTION()
+	void OnRep_Exploded();
 
 	UFUNCTION()
 	void OnRep_PowerLevel();

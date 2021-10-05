@@ -43,6 +43,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectileDamage")
 	float ExplosionDamage;
 
+	UPROPERTY(ReplicatedUsing = OnRep_Exploded)
 	bool bExploded;
 
 	// Radius of damage explosion
@@ -53,8 +54,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectileDamage")
 	float ExplosionDelay;
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastExplode();
+	void Explode();
+
+	UFUNCTION()
+	void OnRep_Exploded();
 
 	// Function that is called when the projectile hits something.
 	UFUNCTION()

@@ -87,7 +87,7 @@ void ATPSTrackerBot::HandleTakeDamage(UTPSHealthComponent* InHealthComp, float C
 	// Explode on hitpoints == 0
 	if(CurrentHealth <= 0.0f)
 	{
-		MulticastSelfDestruct();
+		SelfDestruct();
 	}
 }
 
@@ -106,7 +106,7 @@ FVector ATPSTrackerBot::GetNextPathPoint()
 	return GetActorLocation();
 }
 
-void ATPSTrackerBot::MulticastSelfDestruct_Implementation()
+void ATPSTrackerBot::SelfDestruct()
 {
 	if(bExploded)
 	{
@@ -123,11 +123,16 @@ void ATPSTrackerBot::MulticastSelfDestruct_Implementation()
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
 	// Play sound
 	UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation());
-	// Blast away nearby physics actors
-	RadialForceComp->FireImpulse();
+
+	// Hide Mesh
+	MeshComp->SetVisibility(false, true);
+	MeshComp->SetSimulatePhysics(false);
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	if(HasAuthority())
 	{
+		// Blast away nearby physics actors
+		RadialForceComp->FireImpulse();
 		// Apply radial damage
 		TArray<AActor*> IgnoredActors;
 		IgnoredActors.Add(this);
@@ -135,14 +140,30 @@ void ATPSTrackerBot::MulticastSelfDestruct_Implementation()
 		float ActualDamage = ExplosionDamage + (ExplosionDamage * PowerLevel);
 		UGameplayStatics::ApplyRadialDamage(this, ActualDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), false, ECC_Visibility);
 
-		// Delete Actor immediately
-		Destroy();
+		// Delete Actor with delay
+		SetLifeSpan(2.0f);
 	}
 }
 
 void ATPSTrackerBot::DamageSelf()
 {
 	UGameplayStatics::ApplyDamage(this, 20, GetInstigatorController(), this, nullptr);
+}
+
+void ATPSTrackerBot::OnRep_Exploded()
+{
+	// Draw Sphere
+	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Red, false, 1.0f, 0, 2.0f);
+
+	// Play FX
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
+	// Play sound
+	UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation());
+
+	// Hide Mesh
+	MeshComp->SetVisibility(false, true);
+	MeshComp->SetSimulatePhysics(false);
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ATPSTrackerBot::OnCheckNearbyBots()
@@ -270,6 +291,8 @@ void ATPSTrackerBot::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	// This macro is default: replicate bExploded variable to all clients connected.
+	DOREPLIFETIME(ATPSTrackerBot, bExploded);
 	// This macro is with condition: replicate PowerLevel to all but not to client owning this bot
 	DOREPLIFETIME_CONDITION(ATPSTrackerBot, PowerLevel, COND_SkipOwner);
 }

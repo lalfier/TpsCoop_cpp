@@ -6,6 +6,7 @@
 #include "PhysicsEngine/RadialForceComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Net/UnrealNetwork.h"
 #include "Components/TPSHealthComponent.h"
 
 
@@ -49,10 +50,10 @@ void ATPSProjectile::BeginPlay()
 	
 	// Explode after delay if we did not hit target
 	FTimerHandle TimerHandle_Explode;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle_Explode, this, &ATPSProjectile::MulticastExplode, ExplosionDelay, false);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle_Explode, this, &ATPSProjectile::Explode, ExplosionDelay, false);
 }
 
-void ATPSProjectile::MulticastExplode_Implementation()
+void ATPSProjectile::Explode()
 {
 	if(bExploded)
 	{
@@ -67,19 +68,38 @@ void ATPSProjectile::MulticastExplode_Implementation()
 
 	// Play FX
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
-	// Blast away nearby physics actors
-	RadialForceComp->FireImpulse();
+
+	// Hide Mesh
+	MeshComp->SetVisibility(false, true);
+	MeshComp->SetSimulatePhysics(false);
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 	if(HasAuthority())
 	{
+		// Blast away nearby physics actors
+		RadialForceComp->FireImpulse();
 		// Apply radial damage to nearby actors
 		TArray<AActor*> IgnoredActors;
 		IgnoredActors.Add(this);
 		UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), false, ECC_Visibility);
 
-		// Destroy Actor
-		Destroy();
+		// Delete Actor with delay
+		SetLifeSpan(2.0f);
 	}	
+}
+
+void ATPSProjectile::OnRep_Exploded()
+{
+	// Draw Sphere
+	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Yellow, false, 1.0f, 0, 2.0f);
+
+	// Hide Mesh
+	MeshComp->SetVisibility(false, true);
+	MeshComp->SetSimulatePhysics(false);
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// Play FX
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
 }
 
 // Function that is called when the projectile hits something.
@@ -92,8 +112,17 @@ void ATPSProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor
 		{
 			if(OtherHealthComp->GetCurrentHealth() > 0)
 			{
-				MulticastExplode();
+				Explode();
 			}
 		}		
 	}
+}
+
+// Apply rules for variable replications.
+void ATPSProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// This macro is default: replicate bExploded variable to all clients connected.
+	DOREPLIFETIME(ATPSProjectile, bExploded);
 }
