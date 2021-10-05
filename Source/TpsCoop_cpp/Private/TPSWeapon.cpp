@@ -35,7 +35,7 @@ ATPSWeapon::ATPSWeapon()
 	TracerTargetName = "BeamEnd";
 
 	// When server spawns weapon, than spawn it on clients also
-	SetReplicates(true);
+	bReplicates = true;
 	NetUpdateFrequency = 66.0f;
 	MinNetUpdateFrequency = 33.0f;
 }

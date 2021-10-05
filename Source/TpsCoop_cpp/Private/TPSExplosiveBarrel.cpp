@@ -19,6 +19,7 @@ ATPSExplosiveBarrel::ATPSExplosiveBarrel()
 	MeshComp->SetSimulatePhysics(true);
 	// Set physics body to let radial component affect us (when a nearby barrel explodes)
 	MeshComp->SetCollisionObjectType(ECC_PhysicsBody);
+	MeshComp->SetCanEverAffectNavigation(false);
 	RootComponent = MeshComp;
 
 	RadialForceComp = CreateDefaultSubobject<URadialForceComponent>(TEXT("RadialForceComp"));
@@ -32,7 +33,7 @@ ATPSExplosiveBarrel::ATPSExplosiveBarrel()
 	ExplosionDamage = 100.0f;
 	ExplosionRadius = 400.0f;
 
-	SetReplicates(true);
+	bReplicates = true;
 	SetReplicateMovement(true);
 }
 
@@ -62,7 +63,8 @@ void ATPSExplosiveBarrel::OnHealthChanged(UTPSHealthComponent* InHealthComp, flo
 
 		// Apply radial damage to nearby actors
 		TArray<AActor*> IgnoredActors;
-		UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadius, UDamageType::StaticClass(), IgnoredActors, this, nullptr, false, ECC_Visibility);
+		IgnoredActors.Add(this);
+		UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), false, ECC_Visibility);
 		DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Yellow, false, 1.0f, 0, 2.0f);
 	}
 }

@@ -54,6 +54,14 @@ void ATPSProjectile::BeginPlay()
 
 void ATPSProjectile::MulticastExplode_Implementation()
 {
+	if(bExploded)
+	{
+		return;
+	}
+
+	// Explode!
+	bExploded = true;
+
 	// Draw Sphere
 	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Yellow, false, 1.0f, 0, 2.0f);
 
@@ -66,7 +74,8 @@ void ATPSProjectile::MulticastExplode_Implementation()
 	{
 		// Apply radial damage to nearby actors
 		TArray<AActor*> IgnoredActors;
-		UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadius, UDamageType::StaticClass(), IgnoredActors, this, nullptr, false, ECC_Visibility);
+		IgnoredActors.Add(this);
+		UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), false, ECC_Visibility);
 
 		// Destroy Actor
 		Destroy();
