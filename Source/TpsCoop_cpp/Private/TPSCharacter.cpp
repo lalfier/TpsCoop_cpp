@@ -30,6 +30,9 @@ ATPSCharacter::ATPSCharacter()
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
 	bWasCrouchKeyPressed = false;
 
+	// Setup jump
+	bJumped = false;
+
 	// Setup collision
 	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Ignore);
 
@@ -160,6 +163,16 @@ void ATPSCharacter::Tick(float DeltaTime)
 	// Smooth transition with interpolation
 	float NewFOV = FMath::FInterpTo(CameraComp->FieldOfView, TargetFOV, DeltaTime, ZoomInterpSpeed);
 	CameraComp->SetFieldOfView(NewFOV);
+
+	if(bWasJumping && !bJumped)
+	{
+		bJumped = true;
+	}
+	else if(GetCharacterMovement()->IsMovingOnGround() && bJumped)
+	{
+		bJumped = false;
+	}
+
 }
 
 // Called to bind functionality to input
@@ -201,7 +214,8 @@ void ATPSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	// This macro is default: replicate CurrentWeapon, bDied variable to all clients connected.
+	// This macro is default: replicate CurrentWeapon, bDied, bJumped variable to all clients connected.
 	DOREPLIFETIME(ATPSCharacter, CurrentWeapon);
 	DOREPLIFETIME(ATPSCharacter, bDied);
+	DOREPLIFETIME(ATPSCharacter, bJumped);
 }

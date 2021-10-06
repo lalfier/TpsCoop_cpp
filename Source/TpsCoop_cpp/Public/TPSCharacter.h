@@ -37,6 +37,10 @@ protected:
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
 	bool bDied;
 
+	// Pawn jumped previously
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
+	bool bJumped;
+
 	bool bWasCrouchKeyPressed;
 
 	// Replicate for clients

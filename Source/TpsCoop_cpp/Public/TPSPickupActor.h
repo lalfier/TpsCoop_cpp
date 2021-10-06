@@ -9,6 +9,7 @@
 // Forward declaration
 class UDecalComponent;
 class USphereComponent;
+class ATPSPowerupActor;
 
 
 UCLASS()
@@ -29,6 +30,18 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UDecalComponent* DecalComp;
+
+	UPROPERTY(EditInstanceOnly, Category = "PickupActor")
+	TSubclassOf<ATPSPowerupActor> PowerupClass;
+
+	ATPSPowerupActor* PowerupInstance;
+
+	UPROPERTY(EditInstanceOnly, Category = "PickupActor")
+	float CooldownDuration;
+
+	FTimerHandle TimerHandle_RespawnTimer;
+
+	void RespawnPowerup();
 
 public:
 

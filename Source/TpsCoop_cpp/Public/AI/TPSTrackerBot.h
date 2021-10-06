@@ -65,7 +65,7 @@ protected:
 	// Dynamic material to pulse on damage
 	UMaterialInstanceDynamic* MatInst;
 
-	UPROPERTY(ReplicatedUsing = OnRep_Exploded)
+	UPROPERTY(ReplicatedUsing=OnRep_Exploded)
 	bool bExploded;
 
 	bool bStartedSelfDestruction;

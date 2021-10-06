@@ -2,6 +2,7 @@
 
 
 #include "TPSPowerupActor.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -9,13 +10,9 @@ ATPSPowerupActor::ATPSPowerupActor()
 {
 	PowerupInterval = 0.0f;
 	TotalNrOfTicks = 0;
-}
+	bIsPowerupActive = false;
 
-// Called when the game starts or when spawned
-void ATPSPowerupActor::BeginPlay()
-{
-	Super::BeginPlay();	
-
+	bReplicates = true;
 }
 
 void ATPSPowerupActor::OnTickPowerup()
@@ -27,21 +24,53 @@ void ATPSPowerupActor::OnTickPowerup()
 	// Last tick
 	if(TicksProcessed >= TotalNrOfTicks)
 	{
-		OnExpired();
+		bIsPowerupActive = false;
+		OnPowerupStateChaged();
 
 		// Delete timer
 		GetWorldTimerManager().ClearTimer(TimerHandle_PowerupTick);
 	}
 }
 
-void ATPSPowerupActor::ActivatePowerup()
+void ATPSPowerupActor::OnRep_PowerupActive()
 {
+	OnPowerupStateChaged();
+}
+
+void ATPSPowerupActor::OnPowerupStateChaged()
+{
+	if(bIsPowerupActive)
+	{
+		OnActivated(ActivateForPlayer);
+	}
+	else
+	{
+		OnExpired();
+	}	
+}
+
+void ATPSPowerupActor::ActivatePowerup(AActor* ActivateFor)
+{
+	ActivateForPlayer = ActivateFor;
+	bIsPowerupActive = true;
+	OnPowerupStateChaged();
+
 	if(PowerupInterval > 0.0f)
 	{
-		GetWorldTimerManager().SetTimer(TimerHandle_PowerupTick, this, &ATPSPowerupActor::OnTickPowerup, PowerupInterval, true, 0.0f);
+		GetWorldTimerManager().SetTimer(TimerHandle_PowerupTick, this, &ATPSPowerupActor::OnTickPowerup, PowerupInterval, true);
 	}
 	else
 	{
 		OnTickPowerup();
 	}
+}
+
+// Apply rules for variable replications.
+void ATPSPowerupActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// This macro is default: replicate bIsPowerupActive, ActivateForPlayer variable to all clients connected.
+	DOREPLIFETIME(ATPSPowerupActor, bIsPowerupActive);
+	DOREPLIFETIME(ATPSPowerupActor, ActivateForPlayer);
 }

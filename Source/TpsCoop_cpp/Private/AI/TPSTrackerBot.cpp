@@ -293,8 +293,7 @@ void ATPSTrackerBot::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	// This macro is default: replicate bExploded variable to all clients connected.
+	// This macro is default: replicate bExploded, PowerLevel variable to all clients connected.
 	DOREPLIFETIME(ATPSTrackerBot, bExploded);
-	// This macro is with condition: replicate PowerLevel to all but not to client owning this bot
-	DOREPLIFETIME_CONDITION(ATPSTrackerBot, PowerLevel, COND_SkipOwner);
+	DOREPLIFETIME(ATPSTrackerBot, PowerLevel);
 }

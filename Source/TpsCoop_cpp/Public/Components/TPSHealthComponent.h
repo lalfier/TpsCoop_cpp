@@ -42,6 +42,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "HealthComponent")
 	void ResetCurrentHeath();
+
+	UFUNCTION(BlueprintCallable, Category = "HealthComponent")
+	void HealPlayer(float HealAmount);
 		
 	float GetCurrentHealth()
 	{

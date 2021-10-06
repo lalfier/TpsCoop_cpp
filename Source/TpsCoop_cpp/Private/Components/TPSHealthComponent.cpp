@@ -35,8 +35,8 @@ void UTPSHealthComponent::BeginPlay()
 
 void UTPSHealthComponent::OnRep_CurrentHealth(float OldHealth)
 {
-	float Damage = OldHealth - CurrentHealth;
-	OnHealthChanged.Broadcast(this, CurrentHealth, Damage, nullptr, nullptr, nullptr);
+	float DeltaHealth = CurrentHealth - OldHealth;
+	OnHealthChanged.Broadcast(this, CurrentHealth, DeltaHealth, nullptr, nullptr, nullptr);
 }
 
 void UTPSHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
@@ -51,12 +51,26 @@ void UTPSHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage
 
 	UE_LOG(LogTemp, Log, TEXT("%s Health Changed: %s"), *DamagedActor->GetName(), *FString::SanitizeFloat(CurrentHealth));
 
-	OnHealthChanged.Broadcast(this, CurrentHealth, Damage, DamageType, InstigatedBy, DamageCauser);
+	OnHealthChanged.Broadcast(this, CurrentHealth, -Damage, DamageType, InstigatedBy, DamageCauser);
 }
 
 void UTPSHealthComponent::ResetCurrentHeath()
 {
 	CurrentHealth = MaxHealth;
+}
+
+void UTPSHealthComponent::HealPlayer(float HealAmount)
+{
+	if(HealAmount <= 0.0f || CurrentHealth <= 0.0f)
+	{
+		return;
+	}
+
+	CurrentHealth = FMath::Clamp(CurrentHealth + HealAmount, 0.0f, MaxHealth);
+
+	UE_LOG(LogTemp, Log, TEXT("Health Changed: %s (+%s)"), *FString::SanitizeFloat(CurrentHealth), *FString::SanitizeFloat(HealAmount));
+
+	OnHealthChanged.Broadcast(this, CurrentHealth, HealAmount, nullptr, nullptr, nullptr);
 }
 
 // Apply rules for variable replications.
