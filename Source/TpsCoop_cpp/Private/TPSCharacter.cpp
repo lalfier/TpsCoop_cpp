@@ -79,7 +79,9 @@ void ATPSCharacter::OnHealthChanged(UTPSHealthComponent* InHealthComp, float Cur
 		GetMovementComponent()->StopMovementImmediately();
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		DetachFromControllerPendingDestroy();
-		SetLifeSpan(10.0f);
+		SetLifeSpan(5.0f);
+		EndFire();
+		CurrentWeapon->SetLifeSpan(5.0f);
 	}
 }
 

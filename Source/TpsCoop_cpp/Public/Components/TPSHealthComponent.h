@@ -23,6 +23,8 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	bool bIsDead;
+
 	UPROPERTY(ReplicatedUsing=OnRep_CurrentHealth, BlueprintReadOnly, Category = "HealthComponent")
 	float CurrentHealth;
 
@@ -46,7 +48,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HealthComponent")
 	void HealPlayer(float HealAmount);
 		
-	float GetCurrentHealth()
+	float GetCurrentHealth() const
 	{
 		return CurrentHealth;
 	}

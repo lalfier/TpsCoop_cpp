@@ -105,7 +105,7 @@ void ATPSProjectile::OnRep_Exploded()
 // Function that is called when the projectile hits something.
 void ATPSProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if(OtherActor != this)
+	if(OtherActor && OtherActor != this)
 	{
 		UTPSHealthComponent* OtherHealthComp = OtherActor->FindComponentByClass<UTPSHealthComponent>();
 		if(OtherHealthComp)

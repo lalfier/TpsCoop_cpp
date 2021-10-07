@@ -2,12 +2,14 @@
 
 
 #include "Components/TPSHealthComponent.h"
+#include "TPSGameMode.h"
 #include "Net/UnrealNetwork.h"
 
 
 // Sets default values for this component's properties
 UTPSHealthComponent::UTPSHealthComponent()
 {
+	bIsDead = false;
 	MaxHealth = 100.0f;
 
 	// Replicate this component
@@ -41,17 +43,28 @@ void UTPSHealthComponent::OnRep_CurrentHealth(float OldHealth)
 
 void UTPSHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
-	if(Damage <= 0.0f)
+	if(Damage <= 0.0f || bIsDead)
 	{
 		return;
 	}
 
 	// Update health clamped
 	CurrentHealth = FMath::Clamp((CurrentHealth - Damage), 0.0f, MaxHealth);
+	// Set is dead
+	bIsDead = CurrentHealth <= 0.0f;
 
 	UE_LOG(LogTemp, Log, TEXT("%s Health Changed: %s"), *DamagedActor->GetName(), *FString::SanitizeFloat(CurrentHealth));
 
 	OnHealthChanged.Broadcast(this, CurrentHealth, -Damage, DamageType, InstigatedBy, DamageCauser);
+
+	if(bIsDead)
+	{
+		ATPSGameMode* GM = Cast<ATPSGameMode>(GetWorld()->GetAuthGameMode());
+		if(GM)
+		{
+			GM->OnActorKilled.Broadcast(GetOwner(), DamageCauser, InstigatedBy);
+		}
+	}
 }
 
 void UTPSHealthComponent::ResetCurrentHeath()

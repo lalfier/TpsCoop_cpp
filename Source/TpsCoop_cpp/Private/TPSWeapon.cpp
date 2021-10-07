@@ -27,7 +27,7 @@ ATPSWeapon::ATPSWeapon()
 
 	// Setup weapon damage
 	BaseDamage = 20.0f;
-	DamageMultiplier = 4.0f;
+	DamageMultiplier = 2.0f;
 	RateOfFire = 600;
 
 	// Setup weapon effects

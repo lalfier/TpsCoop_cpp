@@ -43,7 +43,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectileDamage")
 	float ExplosionDamage;
 
-	UPROPERTY(ReplicatedUsing = OnRep_Exploded)
+	UPROPERTY(ReplicatedUsing=OnRep_Exploded)
 	bool bExploded;
 
 	// Radius of damage explosion

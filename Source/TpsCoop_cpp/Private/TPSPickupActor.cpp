@@ -2,6 +2,7 @@
 
 
 #include "TPSPickupActor.h"
+#include "TPSCharacter.h"
 #include "Components/DecalComponent.h"
 #include "Components/SphereComponent.h"
 #include "TPSPowerupActor.h"
@@ -55,10 +56,15 @@ void ATPSPickupActor::NotifyActorBeginOverlap(AActor* OtherActor)
 	// Grant a power-up to player if available
 	if(HasAuthority() && PowerupInstance)
 	{
-		PowerupInstance->ActivatePowerup(OtherActor);
-		PowerupInstance = nullptr;
+		// If player activate power-up
+		ATPSCharacter* PlayerChar = Cast<ATPSCharacter>(OtherActor);
+		if(PlayerChar)
+		{
+			PowerupInstance->ActivatePowerup(PlayerChar);
+			PowerupInstance = nullptr;
 
-		// Set timer to re-spawn
-		GetWorldTimerManager().SetTimer(TimerHandle_RespawnTimer, this, &ATPSPickupActor::RespawnPowerup, CooldownDuration);
+			// Set timer to re-spawn
+			GetWorldTimerManager().SetTimer(TimerHandle_RespawnTimer, this, &ATPSPickupActor::RespawnPowerup, CooldownDuration);
+		}
 	}
 }
