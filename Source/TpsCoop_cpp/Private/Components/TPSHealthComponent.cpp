@@ -11,6 +11,8 @@ UTPSHealthComponent::UTPSHealthComponent()
 {
 	bIsDead = false;
 	MaxHealth = 100.0f;
+	bCanDamageMySelf = false;
+	TeamNum = 255;
 
 	// Replicate this component
 	SetIsReplicatedByDefault(true);
@@ -48,6 +50,12 @@ void UTPSHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage
 		return;
 	}
 
+	// Disable friendly fire
+	//if(DamageCauser != DamagedActor && IsFriendly(DamagedActor, DamageCauser))
+	//{
+	//	return;
+	//}
+
 	// Update health clamped
 	CurrentHealth = FMath::Clamp((CurrentHealth - Damage), 0.0f, MaxHealth);
 	// Set is dead
@@ -84,6 +92,28 @@ void UTPSHealthComponent::HealPlayer(float HealAmount)
 	UE_LOG(LogTemp, Log, TEXT("Health Changed: %s (+%s)"), *FString::SanitizeFloat(CurrentHealth), *FString::SanitizeFloat(HealAmount));
 
 	OnHealthChanged.Broadcast(this, CurrentHealth, HealAmount, nullptr, nullptr, nullptr);
+}
+
+bool UTPSHealthComponent::IsFriendly(AActor* ActorA, AActor* ActorB)
+{
+	if(ActorA == nullptr || ActorB == nullptr)
+	{
+		return false;
+	}
+
+	UTPSHealthComponent* HealthCompA = Cast<UTPSHealthComponent>(ActorA->GetComponentByClass(UTPSHealthComponent::StaticClass()));
+	UTPSHealthComponent* HealthCompB = Cast<UTPSHealthComponent>(ActorB->GetComponentByClass(UTPSHealthComponent::StaticClass()));
+	if(HealthCompA == nullptr || HealthCompB == nullptr)
+	{
+		return false;
+	}
+
+	if(HealthCompA == HealthCompB)
+	{
+		return !HealthCompA->bCanDamageMySelf;
+	}
+
+	return HealthCompA->TeamNum == HealthCompB->TeamNum;
 }
 
 // Apply rules for variable replications.

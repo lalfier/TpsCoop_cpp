@@ -50,6 +50,7 @@ void ATPSProjectileWeapon::Fire()
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			SpawnParams.Instigator = Cast<APawn>(WeaponOwner);
+			SpawnParams.Owner = WeaponOwner;
 
 			TracerEndPoint -= MuzzleLocation;
 			TracerEndPoint.Normalize();

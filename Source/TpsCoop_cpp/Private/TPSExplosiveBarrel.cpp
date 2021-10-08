@@ -9,6 +9,11 @@
 #include "DrawDebugHelpers.h"
 
 
+// Console variable
+static int32 DrawBarrelDebugLinesValue = 0;
+FAutoConsoleVariableRef DrawBarrelDebugDebugLines(TEXT("COOP.DebugBarrel"), DrawBarrelDebugLinesValue, TEXT("Draw Debug Lines for Barrel"), ECVF_Cheat);
+
+
 // Sets default values
 ATPSExplosiveBarrel::ATPSExplosiveBarrel()
 {
@@ -64,8 +69,11 @@ void ATPSExplosiveBarrel::OnHealthChanged(UTPSHealthComponent* InHealthComp, flo
 		// Apply radial damage to nearby actors
 		TArray<AActor*> IgnoredActors;
 		IgnoredActors.Add(this);
-		UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), false, ECC_Visibility);
-		DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Yellow, false, 1.0f, 0, 2.0f);
+		UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, InstigatedBy, false, ECC_Visibility);
+		if(DrawBarrelDebugLinesValue > 0)
+		{
+			DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Yellow, false, 1.0f, 0, 2.0f);
+		}		
 	}
 }
 

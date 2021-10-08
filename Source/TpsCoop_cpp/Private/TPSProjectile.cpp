@@ -10,6 +10,11 @@
 #include "Components/TPSHealthComponent.h"
 
 
+// Console variable
+static int32 DrawProjectileDebugLinesValue = 0;
+FAutoConsoleVariableRef DrawProjectileDebugDebugLines(TEXT("COOP.DebugProjectile"), DrawProjectileDebugLinesValue, TEXT("Draw Debug Lines for Projectile"), ECVF_Cheat);
+
+
 // Sets default values
 ATPSProjectile::ATPSProjectile()
 {
@@ -64,7 +69,10 @@ void ATPSProjectile::Explode()
 	bExploded = true;
 
 	// Draw Sphere
-	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Yellow, false, 1.0f, 0, 2.0f);
+	if(DrawProjectileDebugLinesValue > 0)
+	{
+		DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Yellow, false, 1.0f, 0, 2.0f);
+	}	
 
 	// Play FX
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
@@ -91,7 +99,10 @@ void ATPSProjectile::Explode()
 void ATPSProjectile::OnRep_Exploded()
 {
 	// Draw Sphere
-	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Yellow, false, 1.0f, 0, 2.0f);
+	if(DrawProjectileDebugLinesValue > 0)
+	{
+		DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Yellow, false, 1.0f, 0, 2.0f);
+	}	
 
 	// Hide Mesh
 	MeshComp->SetVisibility(false, true);

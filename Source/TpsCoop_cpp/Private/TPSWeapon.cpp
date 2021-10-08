@@ -29,6 +29,7 @@ ATPSWeapon::ATPSWeapon()
 	BaseDamage = 20.0f;
 	DamageMultiplier = 2.0f;
 	RateOfFire = 600;
+	BulletSpread = 1.0f;
 
 	// Setup weapon effects
 	MuzzleSocketName = "MuzzleSocket";
@@ -65,6 +66,9 @@ void ATPSWeapon::Fire()
 		WeaponOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
 
 		FVector ShotDirection = EyeRotation.Vector();
+		// Add spread to trace/bullet
+		float HalfRad = FMath::DegreesToRadians(BulletSpread);
+		ShotDirection = FMath::VRandCone(ShotDirection, HalfRad, HalfRad);
 		FVector TraceEnd = EyeLocation + (ShotDirection * 10000);
 
 		FCollisionQueryParams QueryParams;
@@ -92,7 +96,7 @@ void ATPSWeapon::Fire()
 			}
 			if(HasAuthority())
 			{
-				UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, WeaponOwner->GetInstigatorController(), this, DamageType);
+				UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, WeaponOwner->GetInstigatorController(), WeaponOwner, DamageType);
 			}			
 
 			PlayImapctEffects(SurfaceType, Hit.ImpactPoint);

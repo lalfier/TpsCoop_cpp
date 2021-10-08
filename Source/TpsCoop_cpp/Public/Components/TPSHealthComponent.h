@@ -39,6 +39,11 @@ protected:
 
 public:
 
+	bool bCanDamageMySelf;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HealthEvent")
+	uint8 TeamNum;
+
 	UPROPERTY(BlueprintAssignable, Category = "HealthEvent")
 	FOnHealthChangedSignature OnHealthChanged;
 
@@ -52,5 +57,8 @@ public:
 	{
 		return CurrentHealth;
 	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "HealthComponent")
+	static bool IsFriendly(AActor* ActorA, AActor* ActorB);
 	
 };

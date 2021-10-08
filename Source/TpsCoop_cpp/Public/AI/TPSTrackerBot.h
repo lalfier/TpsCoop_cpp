@@ -92,6 +92,8 @@ protected:
 
 	FVector GetNextPathPoint();
 
+	void RefreshPath();
+
 	void SelfDestruct();
 
 	void DamageSelf();

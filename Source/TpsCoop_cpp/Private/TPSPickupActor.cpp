@@ -58,7 +58,7 @@ void ATPSPickupActor::NotifyActorBeginOverlap(AActor* OtherActor)
 	{
 		// If player activate power-up
 		ATPSCharacter* PlayerChar = Cast<ATPSCharacter>(OtherActor);
-		if(PlayerChar)
+		if(PlayerChar && PlayerChar->IsPlayerControlled())
 		{
 			PowerupInstance->ActivatePowerup(PlayerChar);
 			PowerupInstance = nullptr;

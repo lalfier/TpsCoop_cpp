@@ -72,8 +72,6 @@ protected:
 	void BeginCrouch();
 	void EndCrouch();
 	void BeginJump();
-	void BeginFire();
-	void EndFire();
 	void BeginZoom();
 	void EndZoom();
 
@@ -90,5 +88,11 @@ public:
 
 	// Override so we can use it on third person character
 	virtual FVector GetPawnViewLocation() const override;
+
+	// Called on input event
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	void BeginFire();
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	void EndFire();
 
 };
