@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Net/UnrealNetwork.h"
+#include "Online.h"
 
 #define SURFACE_FLESHDEFAULT	SurfaceType1
 #define SURFACE_FLESHVULNERABLE SurfaceType2

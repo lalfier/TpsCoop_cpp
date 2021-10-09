@@ -15,9 +15,11 @@ class TPSCOOP_CPP_API ATPSPlayerState : public APlayerState
 {
 	GENERATED_BODY()
 	
-public:
+public:	
 
 	UFUNCTION(BlueprintCallable, Category = "PlayerState")
 	void AddScore(float SocreDelta);
+
+	virtual void OnRep_Score() override;
 
 };

@@ -4,6 +4,7 @@
 #include "TPSGameMode.h"
 #include "TPSGameState.h"
 #include "TPSPlayerState.h"
+#include "TPSCharacter.h"
 #include "EngineUtils.h"
 #include "Components/TPSHealthComponent.h"
 
@@ -17,6 +18,7 @@ ATPSGameMode::ATPSGameMode()
 
 	GameStateClass = ATPSGameState::StaticClass();
 	PlayerStateClass = ATPSPlayerState::StaticClass();
+	DefaultPawnClass = ATPSCharacter::StaticClass();
 
 	TimeBetweenWaves = 2.0f;
 }
