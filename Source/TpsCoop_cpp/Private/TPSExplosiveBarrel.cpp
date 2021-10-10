@@ -5,6 +5,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Components/TPSHealthComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 #include "DrawDebugHelpers.h"
 
@@ -58,6 +59,8 @@ void ATPSExplosiveBarrel::OnHealthChanged(UTPSHealthComponent* InHealthComp, flo
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
 		// Override material on mesh with blackened version
 		MeshComp->SetMaterial(0, ExplodedMaterial);
+		// Play sound
+		UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation());
 
 		// Boost the barrel upwards
 		FVector BoostIntensity = FVector::UpVector * RadialForceComp->ImpulseStrength;
@@ -83,6 +86,8 @@ void ATPSExplosiveBarrel::OnRep_Exploded()
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
 	// Override material on mesh with blackened version
 	MeshComp->SetMaterial(0, ExplodedMaterial);
+	// Play sound
+	UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation());
 }
 
 // Apply rules for variable replications.

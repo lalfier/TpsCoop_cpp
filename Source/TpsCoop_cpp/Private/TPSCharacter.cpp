@@ -56,18 +56,8 @@ void ATPSCharacter::BeginPlay()
 	// Subscribe to an event
 	HealthComp->OnHealthChanged.AddDynamic(this, &ATPSCharacter::OnHealthChanged);
 
-	if(HasAuthority())
-	{
-		// Spawn a default weapon as server
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		CurrentWeapon = GetWorld()->SpawnActor<ATPSWeapon>(StarterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-		if(CurrentWeapon)
-		{
-			CurrentWeapon->SetOwner(this);
-			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
-		}
-	}
+	// Spawn a default weapon as server
+	ChangeWeapon(StarterWeaponClass);
 }
 
 void ATPSCharacter::OnHealthChanged(UTPSHealthComponent* InHealthComp, float CurrentHealth, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
@@ -209,6 +199,28 @@ FVector ATPSCharacter::GetPawnViewLocation() const
 	}
 
 	return Super::GetPawnViewLocation();
+}
+
+void ATPSCharacter::ChangeWeapon(TSubclassOf<ATPSWeapon> WeaponClass)
+{
+	if(HasAuthority())
+	{
+		// First destroy currently equipped weapon
+		if(CurrentWeapon)
+		{
+			CurrentWeapon->Destroy();
+		}
+
+		// Spawn a default weapon as server
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		CurrentWeapon = GetWorld()->SpawnActor<ATPSWeapon>(WeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+		if(CurrentWeapon)
+		{
+			CurrentWeapon->SetOwner(this);
+			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+		}
+	}
 }
 
 // Apply rules for variable replications.

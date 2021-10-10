@@ -11,6 +11,7 @@ class UStaticMeshComponent;
 class UProjectileMovementComponent;
 class URadialForceComponent;
 class UParticleSystem;
+class USoundCue;
 
 
 UCLASS()
@@ -38,6 +39,9 @@ protected:
 	// Particle to play when exploded
 	UPROPERTY(EditDefaultsOnly, Category = "FX")
 	UParticleSystem* ExplosionEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category = "SFX")
+	USoundCue* ExplodeSound;
 
 	// Damage to other actors on explosion
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectileDamage")

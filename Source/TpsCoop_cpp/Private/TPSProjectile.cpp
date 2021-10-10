@@ -3,6 +3,7 @@
 
 #include "TPSProjectile.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "DrawDebugHelpers.h"
@@ -76,6 +77,8 @@ void ATPSProjectile::Explode()
 
 	// Play FX
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
+	// Play sound
+	UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation());
 
 	// Hide Mesh
 	MeshComp->SetVisibility(false, true);
@@ -111,6 +114,8 @@ void ATPSProjectile::OnRep_Exploded()
 
 	// Play FX
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
+	// Play sound
+	UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation());
 }
 
 // Function that is called when the projectile hits something.

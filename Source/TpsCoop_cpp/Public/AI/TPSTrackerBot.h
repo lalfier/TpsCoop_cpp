@@ -94,7 +94,7 @@ protected:
 
 	void RefreshPath();
 
-	void SelfDestruct();
+	void SelfDestruct(AController* InstigatedBy);
 
 	void DamageSelf();
 

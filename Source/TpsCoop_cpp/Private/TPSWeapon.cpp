@@ -5,6 +5,7 @@
 #include "Net/UnrealNetwork.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet//GameplayStatics.h"
+#include "Sound/SoundCue.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -170,6 +171,9 @@ void ATPSWeapon::PlayFireEffects(FVector TraceEnd)
 			TracerEffectComp->SetVectorParameter(TracerTargetName, TraceEnd);
 		}
 	}
+
+	// Play sound
+	UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 
 	// Camera Shake
 	AActor* WeaponOwner = Cast<APawn>(GetOwner());

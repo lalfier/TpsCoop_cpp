@@ -10,6 +10,7 @@
 class USkeletalMeshComponent;
 class UDamageType;
 class UParticleSystem;
+class USoundCue;
 
 
 // Contains information of a single hit-scan weapon line-trace
@@ -68,6 +69,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	UParticleSystem* TracerEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	USoundCue* FireSound;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<UCameraShakeBase> FireCamShake;

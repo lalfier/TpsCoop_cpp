@@ -93,7 +93,7 @@ void ATPSTrackerBot::HandleTakeDamage(UTPSHealthComponent* InHealthComp, float C
 	// Explode on hitpoints == 0
 	if(CurrentHealth <= 0.0f)
 	{
-		SelfDestruct();
+		SelfDestruct(InstigatedBy);
 	}
 }
 
@@ -146,7 +146,7 @@ void ATPSTrackerBot::RefreshPath()
 	NextPathPoint = GetNextPathPoint();
 }
 
-void ATPSTrackerBot::SelfDestruct()
+void ATPSTrackerBot::SelfDestruct(AController* InstigatedBy)
 {
 	if(bExploded)
 	{
@@ -181,7 +181,7 @@ void ATPSTrackerBot::SelfDestruct()
 		IgnoredActors.Add(this);
 		// Increase damage based on the power level
 		float ActualDamage = ExplosionDamage + (ExplosionDamage * PowerLevel);
-		UGameplayStatics::ApplyRadialDamage(this, ActualDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), false, ECC_Visibility);
+		UGameplayStatics::ApplyRadialDamage(this, ActualDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, InstigatedBy, false, ECC_Visibility);
 
 		// Delete Actor with delay
 		SetLifeSpan(2.0f);

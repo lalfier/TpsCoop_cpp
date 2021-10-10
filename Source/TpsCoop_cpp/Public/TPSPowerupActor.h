@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "TPSPowerupActor.generated.h"
 
+// Forward declaration
+class USoundCue;
+
 
 UCLASS()
 class TPSCOOP_CPP_API ATPSPowerupActor : public AActor
@@ -37,6 +40,9 @@ protected:
 	// Actor on which power-up is activated
 	UPROPERTY(Replicated)
 	AActor* ActivateForPlayer;
+
+	UPROPERTY(EditDefaultsOnly, Category = "SFX")
+	USoundCue* ActivateSound;
 
 	UFUNCTION()
 	void OnTickPowerup();

@@ -89,6 +89,10 @@ public:
 	// Override so we can use it on third person character
 	virtual FVector GetPawnViewLocation() const override;
 
+	// Change Weapon
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	void ChangeWeapon(TSubclassOf<ATPSWeapon> WeaponClass);
+
 	// Called on input event
 	UFUNCTION(BlueprintCallable, Category = "Player")
 	void BeginFire();

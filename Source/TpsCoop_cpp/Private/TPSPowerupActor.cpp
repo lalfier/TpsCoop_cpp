@@ -2,6 +2,8 @@
 
 
 #include "TPSPowerupActor.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -42,6 +44,8 @@ void ATPSPowerupActor::OnPowerupStateChaged()
 	if(bIsPowerupActive)
 	{
 		OnActivated(ActivateForPlayer);
+		// Play sound
+		UGameplayStatics::PlaySoundAtLocation(this, ActivateSound, GetActorLocation());
 	}
 	else
 	{
