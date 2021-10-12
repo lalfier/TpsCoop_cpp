@@ -9,6 +9,7 @@
 // Forward declaration
 class UStaticMeshComponent;
 class UProjectileMovementComponent;
+class UParticleSystemComponent;
 class URadialForceComponent;
 class UParticleSystem;
 class USoundCue;
@@ -39,6 +40,12 @@ protected:
 	// Particle to play when exploded
 	UPROPERTY(EditDefaultsOnly, Category = "FX")
 	UParticleSystem* ExplosionEffect;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UParticleSystemComponent* TracerEffectComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "FX")
+	UParticleSystem* TracerEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category = "SFX")
 	USoundCue* ExplodeSound;

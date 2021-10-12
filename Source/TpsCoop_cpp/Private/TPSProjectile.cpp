@@ -6,6 +6,7 @@
 #include "Sound/SoundCue.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
 #include "Components/TPSHealthComponent.h"
@@ -41,6 +42,9 @@ ATPSProjectile::ATPSProjectile()
 	ProjectileMoveComp->MaxSpeed = 2000;
 	ProjectileMoveComp->InitialSpeed = 2000;
 
+	TracerEffectComp = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("TracerEffectComp"));	
+	TracerEffectComp->SetupAttachment(MeshComp);
+
 	ExplosionDamage = 100.0f;
 	ExplosionRadius = 200.0f;
 	ExplosionDelay = 1.0f;
@@ -57,6 +61,13 @@ void ATPSProjectile::BeginPlay()
 	// Explode after delay if we did not hit target
 	FTimerHandle TimerHandle_Explode;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle_Explode, this, &ATPSProjectile::Explode, ExplosionDelay, false);
+
+	// Start trail
+	if(TracerEffect)
+	{
+		TracerEffectComp->Template = TracerEffect;
+		TracerEffectComp->BeginTrails("Trail1", "Trail2", ETrailWidthMode_FromFirst, 1.0f);
+	}
 }
 
 void ATPSProjectile::Explode()
